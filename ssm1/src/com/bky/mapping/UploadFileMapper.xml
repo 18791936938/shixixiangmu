@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bky.dao.UploadFileMapper">
+  <resultMap id="UploadFileResultMap" type="com.bky.model.UploadFile">
+  	<result column="fileId" property="fileId" jdbcType="VARCHAR"/>
+  	<result column="userId" property="userId" jdbcType="VARCHAR"/>
+    <result column="fileName" property="fileName" jdbcType="VARCHAR"/>
+    <result column="downloadLink" property="downloadLink" jdbcType="VARCHAR"/>
+    <result column="uploadTime" property="uploadTime" jdbcType="TIMESTAMP"/>
+    <result column="downloadTimes" property="downloadTimes" jdbcType="INTEGER"/>
+    <result column="viewTimes" property="viewTimes" jdbcType="INTEGER"/>
+    <result column="collectTimes" property="collectTimes" jdbcType="INTEGER"/>
+    <result column="tag" property="tag" jdbcType="VARCHAR"/>
+    <result column="typeId" property="typeId" jdbcType="INTEGER"/>
+    <result column="fileRealName" property="fileRealName" jdbcType="VARCHAR"/>
+  </resultMap>
+    <resultMap id="userViewCollectResultMap" type="com.bky.model.UserViewCollect">
+  	<result column="userId" property="userId" jdbcType="VARCHAR"/>
+  	<result column="viewUserId" property="viewUserId" jdbcType="VARCHAR"/>
+  	<result column="collectUserId" property="collectUserId" jdbcType="VARCHAR"/>
+  </resultMap>
+  <insert id="addFile" parameterType="com.bky.model.UploadFile">
+    insert into file 
+    	(
+    		fileId,
+    		userId,
+    		fileName, 
+    	 	downloadLink,
+    	 	uploadTime,
+    	 	downloadTimes,
+    	 	viewTimes,
+    	 	collectTimes,
+    	 	tag,
+    	 	typeId,
+    	 	fileRealName
+      	)
+    values 
+    	(
+    		#{fileId,jdbcType=VARCHAR},
+    		#{userId,jdbcType=VARCHAR},
+    		#{fileName,jdbcType=VARCHAR},
+    	 	#{downloadLink,jdbcType=VARCHAR},
+    	 	#{uploadTime,jdbcType=TIMESTAMP},
+    	 	#{downloadTimes,jdbcType=INTEGER},
+    	 	#{viewTimes,jdbcType=INTEGER},
+    	 	#{collectTimes,jdbcType=INTEGER},
+    	 	#{tag,jdbcType=VARCHAR},
+    	 	#{typeId,jdbcType=INTEGER},
+    	 	#{fileRealName,jdbcType=VARCHAR}
+      	)
+  </insert>
+  
+  <select id="queryUploadFile" resultMap="UploadFileResultMap">  
+    select * from file f
+    where 1=1 order by uploadtime desc
+  </select>
+  
+  <select id="queryUploadFileById" parameterType="java.lang.String" resultMap="UploadFileResultMap">  
+    select * from file f
+    where f.fileId = #{fileId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="queryUploadFileByFileName" parameterType="java.util.HashMap" resultMap="UploadFileResultMap">  
+    select * from file f 
+    	<where>
+	    	<if test="fileName!= null and fileName!='' ">  
+	    	 f.filename like concat('%',#{fileName,jdbcType=VARCHAR},'%')
+	        </if> 
+        </where>
+  </select>
+  
+  <select id="queryUploadFileByFileNameAndTime" parameterType="java.util.HashMap" resultMap="UploadFileResultMap">  
+    select * from file f 
+    	<where>
+	    	<if test="fileName!= null and fileName!='' ">  
+	    	 f.filename like concat('%',#{fileName,jdbcType=VARCHAR},'%')
+	        </if> 
+	    </where>
+      order by uploadtime 
+  </select>
+  <select id="queryUploadFileByFileNameAndHot" parameterType="java.util.HashMap" resultMap="UploadFileResultMap">  
+    select * from file f 
+    	<where>
+	    	<if test="fileName!= null and fileName!='' ">  
+	    	 f.filename like concat('%',#{fileName,jdbcType=VARCHAR},'%')
+	        </if> 
+	    </where>
+      order by collecttimes desc
+  </select>
+  
+  <select id="queryMoreUploadFile" parameterType="map" resultMap="UploadFileResultMap">  
+    select * from file
+    <where>
+    	<if test="fileId!= null and fileId!='' ">  
+            fileId != #{fileId}   
+        </if> 
+        <if test="userId!= null and userId!='' ">  
+            and userId = #{userId}   
+        </if> 
+    </where>
+  </select>
+  
+  <delete id="deleteFileByFileId" parameterType="java.lang.String" >
+ 	 delete from file where fileId= #{fileId,jdbcType=VARCHAR}
+  </delete>
+  
+  <update id="updateFileCollectTimes" parameterType="com.bky.model.UploadFile" >
+ 	 update file set collectTimes=#{collectTimes,jdbcType=INTEGER} where fileId= #{fileId,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateFileViewTimes" parameterType="com.bky.model.UploadFile" >
+ 	 update file set viewTimes=#{viewTimes,jdbcType=INTEGER} where fileId= #{fileId,jdbcType=VARCHAR}
+  </update>
+  
+  <select id="getTimesUserCount" parameterType="com.bky.model.UserViewCollect" resultType="java.lang.Integer">
+  		SELECT count(*) FROM user_view_collect_t t WHERE t.userId=#{userId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="getTimesUser" parameterType="com.bky.model.UserViewCollect" resultMap="userViewCollectResultMap">
+  		SELECT * FROM user_view_collect_t t WHERE t.userId=#{userId,jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="insertTimesUser" parameterType="com.bky.model.UserViewCollect">
+  		INSERT INTO user_view_collect_t(
+	  		userId
+	  		<if test="viewId!= null and viewId!='' ">  	    	 
+	  		,viewId
+	        </if> 
+	        <if test="collectId!= null and collectId!='' ">  	    	 
+	  		,collectId
+	        </if>
+	  		)VALUES(
+	  		#{userId,jdbcType=VARCHAR}
+	  		<if test="viewId!= null and viewId!='' ">  
+	  		,#{viewId,jdbcType=VARCHAR}
+	  		</if>
+	  		<if test="collectId!= null and collectId!='' ">  
+	  		,#{collectId,jdbcType=VARCHAR}
+	  		</if>
+  		)
+  </insert>
+  <update id="updateUserView" parameterType="com.bky.model.UserViewCollect">
+  		UPDATE user_view_collect_t SET 
+  		viewId = #{viewId,jdbcType=VARCHAR}
+  		WHERE 
+  		userId = #{userId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateUserCollect" parameterType="com.bky.model.UserViewCollect">
+  		UPDATE user_view_collect_t SET 
+  		collectId = #{collectId,jdbcType=VARCHAR}
+  		WHERE 
+  		userId = #{userId,jdbcType=VARCHAR}
+  </update>
+</mapper>

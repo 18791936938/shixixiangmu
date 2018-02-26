@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bky.dao.CollectMapper">
+  <resultMap id="collectResultMap" type="com.bky.model.Collect" >
+  	<result column="fileId" property="fileId" jdbcType="VARCHAR" />
+    <result column="userId" property="userId" jdbcType="VARCHAR" />
+    <result column="coll_time" property="coll_time" jdbcType="TIMESTAMP" />
+  </resultMap>
+  
+  <insert id="addCollect" parameterType="com.bky.model.Collect">
+    insert into collect 
+    	(
+    		fileId,
+    		userId, 
+    	 	coll_time
+      	)
+    values 
+    	(
+    		#{fileId,jdbcType=VARCHAR},
+    		#{userId,jdbcType=VARCHAR},
+    		#{coll_time,jdbcType=TIMESTAMP}
+      	)
+  </insert>
+  
+  <select id="queryCollectByUserId" parameterType="java.lang.String" resultMap="collectResultMap">  
+    select * from collect c
+    where 1=1 and c.userId = #{userId,jdbcType=VARCHAR}
+  </select>
+  
+  <delete id="deleteCollectByFileId" parameterType="java.lang.String" >
+ 	 delete from collect where fileId= #{fileId,jdbcType=VARCHAR}
+  </delete>
+</mapper>
